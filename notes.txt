@@ -1,0 +1,2 @@
+todo
+1) remember to change bar to fixed only for landing page and static for all other pages 

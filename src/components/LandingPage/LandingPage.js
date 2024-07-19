@@ -8,17 +8,16 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
-import AppAppBar from "./components/LandingPage/components/AppAppBar";
-import Hero from "./components/LandingPage/components/Hero";
-import LogoCollection from "./components/LandingPage/components/LogoCollection";
-import Highlights from "./components/LandingPage/components/Highlights";
-import Pricing from "./components/LandingPage/components/Pricing";
-import Features from "./components/LandingPage/components/Features";
-import Testimonials from "./components/LandingPage/components/Testimonials";
-import FAQ from "./components/LandingPage/components/FAQ";
-import Footer from "./components/LandingPage/components/Footer";
-import getLPTheme from "../src/components/LandingPage/getLPTheme";
-import { Outlet } from "react-router-dom";
+import AppAppBar from "./components/AppAppBar";
+import Hero from "./components/Hero";
+import LogoCollection from "./components/LogoCollection";
+import Highlights from "./components/Highlights";
+import Pricing from "./components/Pricing";
+import Features from "./components/Features";
+import Testimonials from "./components/Testimonials";
+import FAQ from "./components/FAQ";
+import Footer from "./components/Footer";
+import getLPTheme from "./getLPTheme";
 
 function ToggleCustomTheme({ showCustomTheme, toggleCustomTheme }) {
   return (
@@ -64,7 +63,7 @@ ToggleCustomTheme.propTypes = {
   toggleCustomTheme: PropTypes.func.isRequired,
 };
 
-export default function App() {
+export default function LandingPage() {
   const [mode, setMode] = React.useState("light");
   const [showCustomTheme, setShowCustomTheme] = React.useState(true);
   const LPtheme = createTheme(getLPTheme(mode));
@@ -81,10 +80,10 @@ export default function App() {
   return (
     <ThemeProvider theme={showCustomTheme ? LPtheme : defaultTheme}>
       <CssBaseline />
-      <AppAppBar mode={mode} toggleColorMode={toggleColorMode} />
-      {/* <Hero /> */}
+      {/* <AppAppBar mode={mode} toggleColorMode={toggleColorMode} /> */}
+      <Hero />
       <Box sx={{ bgcolor: "background.default" }}>
-        {/* <LogoCollection />
+        <LogoCollection />
         <Features />
         <Divider />
         <Testimonials />
@@ -94,11 +93,8 @@ export default function App() {
         <Pricing />
         <Divider />
         <FAQ />
-        <Divider /> */}
-        <div>
-          <Outlet></Outlet>
-        </div>
-        <Footer />
+        <Divider />
+        {/* <Footer /> */}
       </Box>
       <ToggleCustomTheme
         showCustomTheme={showCustomTheme}

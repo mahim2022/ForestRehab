@@ -1,6 +1,5 @@
 import * as React from "react";
-import PropTypes from "prop-types";
-
+import { PaletteMode } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
@@ -8,19 +7,26 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
-import AppAppBar from "./components/LandingPage/components/AppAppBar";
-import Hero from "./components/LandingPage/components/Hero";
-import LogoCollection from "./components/LandingPage/components/LogoCollection";
-import Highlights from "./components/LandingPage/components/Highlights";
-import Pricing from "./components/LandingPage/components/Pricing";
-import Features from "./components/LandingPage/components/Features";
-import Testimonials from "./components/LandingPage/components/Testimonials";
-import FAQ from "./components/LandingPage/components/FAQ";
-import Footer from "./components/LandingPage/components/Footer";
-import getLPTheme from "../src/components/LandingPage/getLPTheme";
-import { Outlet } from "react-router-dom";
+import AppAppBar from "./components/AppAppBar";
+import Hero from "./components/Hero";
+import LogoCollection from "./components/LogoCollection";
+import Highlights from "./components/Highlights";
+import Pricing from "./components/Pricing";
+import Features from "./components/Features";
+import Testimonials from "./components/Testimonials";
+import FAQ from "./components/FAQ";
+import Footer from "./components/Footer";
+import getLPTheme from "./getLPTheme";
 
-function ToggleCustomTheme({ showCustomTheme, toggleCustomTheme }) {
+interface ToggleCustomThemeProps {
+  showCustomTheme: Boolean;
+  toggleCustomTheme: () => void;
+}
+
+function ToggleCustomTheme({
+  showCustomTheme,
+  toggleCustomTheme,
+}: ToggleCustomThemeProps) {
   return (
     <Box
       sx={{
@@ -57,15 +63,8 @@ function ToggleCustomTheme({ showCustomTheme, toggleCustomTheme }) {
   );
 }
 
-ToggleCustomTheme.propTypes = {
-  showCustomTheme: PropTypes.shape({
-    valueOf: PropTypes.func.isRequired,
-  }).isRequired,
-  toggleCustomTheme: PropTypes.func.isRequired,
-};
-
-export default function App() {
-  const [mode, setMode] = React.useState("light");
+export default function LandingPage() {
+  const [mode, setMode] = React.useState<PaletteMode>("light");
   const [showCustomTheme, setShowCustomTheme] = React.useState(true);
   const LPtheme = createTheme(getLPTheme(mode));
   const defaultTheme = createTheme({ palette: { mode } });
@@ -82,9 +81,9 @@ export default function App() {
     <ThemeProvider theme={showCustomTheme ? LPtheme : defaultTheme}>
       <CssBaseline />
       <AppAppBar mode={mode} toggleColorMode={toggleColorMode} />
-      {/* <Hero /> */}
+      <Hero />
       <Box sx={{ bgcolor: "background.default" }}>
-        {/* <LogoCollection />
+        <LogoCollection />
         <Features />
         <Divider />
         <Testimonials />
@@ -94,10 +93,7 @@ export default function App() {
         <Pricing />
         <Divider />
         <FAQ />
-        <Divider /> */}
-        <div>
-          <Outlet></Outlet>
-        </div>
+        <Divider />
         <Footer />
       </Box>
       <ToggleCustomTheme
