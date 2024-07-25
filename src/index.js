@@ -18,6 +18,15 @@ import SignUp from "./components/Signup/Signup";
 import LandingPage from "./components/LandingPage/LandingPage";
 import Contact from "./components/Contact/Contact";
 import ReportForm from "./components/ReportForm/ReportForm";
+import ReportList from "./components/ReportList/ReportList";
+import ReportDetail from "./components/ReportDetail/ReportDetail";
+import ProjectForm from "./components/ProjectForm/ProjectForm";
+import Dashboard from "./components/Dashboard/Dashboard";
+import ReportManagement from "./components/Dashboard/ReportManagement";
+import EditReportForm from "./components/Dashboard/EditReport/EditReport";
+import ProjectManagement from "./components/Dashboard/ProjectManagement/ProjectManagement";
+import ViewProject from "./components/Dashboard/ViewProject/ViewProject";
+import EditProject from "./components/Dashboard/EditProject/EditProject";
 // import TestApp from "./TestApp";
 
 const router = createBrowserRouter([
@@ -35,7 +44,7 @@ const router = createBrowserRouter([
       },
       {
         path: "report",
-        element: <ReportDeforestation />,
+        element: <ReportList />,
       },
       {
         path: "community",
@@ -53,14 +62,7 @@ const router = createBrowserRouter([
         path: "project",
         element: <ReforestationProject />,
       },
-      {
-        path: "dashboard",
-        element: (
-          <PrivateRoute>
-            <UserDashboard />
-          </PrivateRoute>
-        ),
-      },
+
       {
         path: "signin",
         element: <SignIn />,
@@ -76,6 +78,42 @@ const router = createBrowserRouter([
       {
         path: "reportForm",
         element: <ReportForm />,
+      },
+      // {
+      //   path: "reportList",
+      //   element: <ReportList />,
+      // },
+      {
+        path: "/report/:id",
+        element: <ReportDetail />,
+      },
+      {
+        path: "/projectForm",
+        element: <ProjectForm />,
+      },
+      {
+        path: "/dashboard",
+        element: <Dashboard />,
+      },
+      {
+        path: "/reportManagement",
+        element: <ReportManagement />,
+      },
+      {
+        path: "/edit-report/:id",
+        element: <EditReportForm />,
+      },
+      {
+        path: "/projectManagement",
+        element: <ProjectManagement />,
+      },
+      {
+        path: "/project/:projectId",
+        element: <ViewProject />,
+      },
+      {
+        path: "/editproject/:projectId",
+        element: <EditProject />,
       },
     ],
   },

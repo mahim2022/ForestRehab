@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { db, storage } from "../../firebase"; // Import Firestore and Storage instances
-import { collection, addDoc } from "firebase/firestore";
+import React, { useState, useEffect } from "react";
+import { db, storage } from "../../../firebase"; // Import Firestore and Storage instances
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid"; // To generate unique IDs for the images
 import {
   TextField,
@@ -14,14 +14,38 @@ import {
 } from "@mui/material";
 import { getAuth } from "firebase/auth";
 
-function ReportForm() {
+function EditReportForm() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const [image, setImage] = useState(null);
+  const [existingImageUrl, setExistingImageUrl] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { id } = useParams(); // Get the report ID from the URL parameters
   const auth = getAuth(); // Access Firebase Auth
+
+  useEffect(() => {
+    const fetchReport = async () => {
+      try {
+        const docRef = doc(db, "reports", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const reportData = docSnap.data();
+          setTitle(reportData.title);
+          setDescription(reportData.description);
+          setLocation(reportData.location);
+          setExistingImageUrl(reportData.imageUrl);
+        } else {
+          console.log("No such document!");
+        }
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    fetchReport();
+  }, [id]);
 
   const handleImageChange = (e) => {
     if (e.target.files[0]) {
@@ -32,7 +56,7 @@ function ReportForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    let imageUrl = "";
+    let imageUrl = existingImageUrl;
     if (image) {
       const imageRef = ref(storage, `reports/${uuidv4()}-${image.name}`);
       await uploadBytes(imageRef, image);
@@ -41,7 +65,8 @@ function ReportForm() {
 
     try {
       const user = auth.currentUser;
-      await addDoc(collection(db, "reports"), {
+      const reportRef = doc(db, "reports", id);
+      await updateDoc(reportRef, {
         title,
         description,
         location,
@@ -50,7 +75,7 @@ function ReportForm() {
         userId: user?.uid || null, // Save user ID in Firestore
         userEmail: user?.email || null, // Save user email in Firestore
       });
-      navigate("/"); // Redirect to home page after successful report submission
+      navigate("/reportmanagement"); // Redirect to report management page after successful report update
     } catch (err) {
       setError(err.message);
     }
@@ -59,7 +84,7 @@ function ReportForm() {
   return (
     <Container maxWidth="sm">
       <Typography variant="h4" component="h1" gutterBottom>
-        Report Deforestation
+        Edit Report
       </Typography>
       <form onSubmit={handleSubmit}>
         <Grid container spacing={3}>
@@ -93,14 +118,21 @@ function ReportForm() {
             />
           </Grid>
           <Grid item xs={12}>
+            {existingImageUrl && (
+              <img
+                src={existingImageUrl}
+                alt="Report"
+                style={{ width: "100%", marginBottom: "10px" }}
+              />
+            )}
             <Button variant="contained" component="label">
-              Upload Photo
+              Upload New Photo
               <input type="file" hidden onChange={handleImageChange} />
             </Button>
           </Grid>
           <Grid item xs={12}>
             <Button type="submit" variant="contained" color="primary">
-              Submit Report
+              Update Report
             </Button>
           </Grid>
         </Grid>
@@ -114,4 +146,4 @@ function ReportForm() {
   );
 }
 
-export default ReportForm;
+export default EditReportForm;

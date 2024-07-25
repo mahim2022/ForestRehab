@@ -95,7 +95,7 @@ export default function App() {
         <Divider />
         <FAQ />
         <Divider /> */}
-        <div>
+        <div style={{ marginTop: "100px" }}>
           <Outlet></Outlet>
         </div>
         <Footer />

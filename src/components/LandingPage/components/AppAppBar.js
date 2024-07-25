@@ -13,13 +13,47 @@ import Drawer from "@mui/material/Drawer";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ToggleColorMode from "./ToggleColorMode";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import Avatar from "@mui/material/Avatar";
+import Menu from "@mui/material/Menu";
+import { useState, useEffect } from "react";
+
+// import MenuItem from "@mui/material/MenuItem";
 
 import Sitemark from "./SitemarkIcon";
 
 import { useNavigate } from "react-router-dom";
 
 function AppAppBar({ mode, toggleColorMode }) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  const auth = getAuth();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null);
+      }
+    });
+    return () => unsubscribe();
+  }, [auth]);
+
+  const handleSignOut = async () => {
+    await signOut(auth);
+    navigate("/signin");
+  };
+
+  const handleAvatarClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
@@ -39,11 +73,9 @@ function AppAppBar({ mode, toggleColorMode }) {
     }
   };
 
-  const navigate = useNavigate();
-
   return (
     <AppBar
-      position="static"
+      position="fixed"
       sx={{
         boxShadow: 0,
         bgcolor: "transparent",
@@ -129,6 +161,15 @@ function AppAppBar({ mode, toggleColorMode }) {
               >
                 Contact
               </Button>
+              <Button
+                variant="text"
+                color="info"
+                size="small"
+                onClick={() => navigate("dashboard")}
+                sx={{ minWidth: 0 }}
+              >
+                Dashboard
+              </Button>
             </Box>
           </Box>
           <Box
@@ -143,22 +184,42 @@ function AppAppBar({ mode, toggleColorMode }) {
               mode={mode}
               toggleColorMode={toggleColorMode}
             />
-            <Button
-              color="primary"
-              variant="text"
-              size="small"
-              onClick={() => navigate("signin")}
-            >
-              Sign in
-            </Button>
-            <Button
-              color="primary"
-              variant="contained"
-              size="small"
-              onClick={() => navigate("signup")}
-            >
-              Sign up
-            </Button>
+            {user ? (
+              <>
+                <IconButton onClick={handleAvatarClick}>
+                  <Avatar src={user.photoURL} alt={user.displayName} />
+                </IconButton>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleClose}
+                >
+                  <MenuItem onClick={() => navigate("/profile")}>
+                    Profile
+                  </MenuItem>
+                  <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <>
+                <Button
+                  color="primary"
+                  variant="text"
+                  size="small"
+                  onClick={() => navigate("signin")}
+                >
+                  Sign in
+                </Button>
+                <Button
+                  color="primary"
+                  variant="contained"
+                  size="small"
+                  onClick={() => navigate("signup")}
+                >
+                  Sign up
+                </Button>
+              </>
+            )}
           </Box>
           <Box sx={{ display: { sm: "flex", md: "none" } }}>
             <IconButton aria-label="Menu button" onClick={toggleDrawer(true)}>
@@ -195,16 +256,37 @@ function AppAppBar({ mode, toggleColorMode }) {
                   Pricing
                 </MenuItem>
                 <MenuItem onClick={() => scrollToSection("faq")}>FAQ</MenuItem>
-                <MenuItem>
-                  <Button color="primary" variant="contained" fullWidth>
-                    Sign up
-                  </Button>
-                </MenuItem>
-                <MenuItem>
-                  <Button color="primary" variant="outlined" fullWidth>
-                    Sign in
-                  </Button>
-                </MenuItem>
+                {user ? (
+                  <>
+                    <MenuItem onClick={() => navigate("/profile")}>
+                      Profile
+                    </MenuItem>
+                    <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
+                  </>
+                ) : (
+                  <>
+                    <MenuItem>
+                      <Button
+                        color="primary"
+                        variant="contained"
+                        fullWidth
+                        onClick={() => navigate("signup")}
+                      >
+                        Sign up
+                      </Button>
+                    </MenuItem>
+                    <MenuItem>
+                      <Button
+                        color="primary"
+                        variant="outlined"
+                        fullWidth
+                        onClick={() => navigate("signin")}
+                      >
+                        Sign in
+                      </Button>
+                    </MenuItem>
+                  </>
+                )}
               </Box>
             </Drawer>
           </Box>
