@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Container, Typography, Button, Grid } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../firebase";
@@ -6,15 +6,31 @@ import { auth } from "../../firebase";
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  const handleSignOut = () => {
-    auth.signOut();
-    navigate("/login");
+  useEffect(() => {
+    // Check the authentication state
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (!user) {
+        navigate("/signin"); // Redirect to login if user is not authenticated
+      }
+    });
+
+    // Clean up the listener on component unmount
+    return () => unsubscribe();
+  }, [navigate]);
+
+  const handleSignOut = async () => {
+    try {
+      await auth.signOut();
+      navigate("/"); // Redirect to login after signing out
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   const options = [
     { label: "Reports", path: "/reportManagement" },
     { label: "Projects", path: "/projectManagement" },
-    { label: "Resources", path: "/upload-resources" },
+    { label: "Resources", path: "/resourceManager" },
   ];
 
   return (

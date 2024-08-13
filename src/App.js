@@ -100,10 +100,10 @@ export default function App() {
         </div>
         <Footer />
       </Box>
-      <ToggleCustomTheme
+      {/* <ToggleCustomTheme
         showCustomTheme={showCustomTheme}
         toggleCustomTheme={toggleCustomTheme}
-      />
+      /> */}
     </ThemeProvider>
   );
 }

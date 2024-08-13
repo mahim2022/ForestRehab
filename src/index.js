@@ -27,6 +27,17 @@ import EditReportForm from "./components/Dashboard/EditReport/EditReport";
 import ProjectManagement from "./components/Dashboard/ProjectManagement/ProjectManagement";
 import ViewProject from "./components/Dashboard/ViewProject/ViewProject";
 import EditProject from "./components/Dashboard/EditProject/EditProject";
+import ProjectList from "./components/ProjectList/ProjectList";
+import UploadResource from "./components/Dashboard/UploadResources/UploadResources";
+import ResourceManager from "./components/Dashboard/ResourceManager/ResourceManager";
+import ViewResource from "./components/Dashboard/ViewResource/ViewResource";
+import ResourcesList from "./components/ResourcesList/ResourcesList";
+import CreatePost from "./components/Forum/CreatePost";
+import PostDetails from "./components/Forum/PostDetails";
+import EditPost from "./components/Forum/EditPost";
+import ForumOverview from "./components/Forum/ForumOverview";
+import News from "./components/NewsComponent/NewsComponent";
+// import ResourceList from "./components/Dashboard/ResourceList/ResourceList";
 // import TestApp from "./TestApp";
 
 const router = createBrowserRouter([
@@ -56,7 +67,7 @@ const router = createBrowserRouter([
       },
       {
         path: "news",
-        element: <NewsUpdate />,
+        element: <News />,
       },
       {
         path: "project",
@@ -114,6 +125,43 @@ const router = createBrowserRouter([
       {
         path: "/editproject/:projectId",
         element: <EditProject />,
+      },
+      {
+        path: "/projectList",
+        element: <ProjectList />,
+      },
+      {
+        path: "/uploadResource",
+        element: <UploadResource />,
+      },
+      {
+        path: "/ResourceManager",
+        element: <ResourceManager />,
+      },
+
+      {
+        path: "/Resource/:resourceId",
+        element: <ViewResource />,
+      },
+      {
+        path: "/Resourceslist",
+        element: <ResourcesList />,
+      },
+      {
+        path: "/forum",
+        element: <ForumOverview />,
+      },
+      {
+        path: "/create-post",
+        element: <CreatePost />,
+      },
+      {
+        path: "/post/:postId",
+        element: <PostDetails />,
+      },
+      {
+        path: "/edit-post/:postId",
+        element: <EditPost />,
       },
     ],
   },

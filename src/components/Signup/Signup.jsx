@@ -12,9 +12,10 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { auth } from "../../firebase";
+import { auth, db } from "../../firebase"; // Adjust the import path as needed
 import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 
 function Copyright(props) {
   return (
@@ -34,8 +35,6 @@ function Copyright(props) {
   );
 }
 
-// TODO remove, this demo shouldn't need to reset the theme.
-
 const defaultTheme = createTheme();
 
 export default function SignUp() {
@@ -43,16 +42,27 @@ export default function SignUp() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+    const email = data.get("email");
+    const password = data.get("password");
+    const firstName = data.get("firstName");
+    const lastName = data.get("lastName");
+
     try {
-      await createUserWithEmailAndPassword(
+      const userCredential = await createUserWithEmailAndPassword(
         auth,
-        data.get("email"),
-        data.get("password")
+        email,
+        password
       );
+      const user = userCredential.user;
+
+      // Create user document in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        firstName,
+        lastName,
+        email,
+        userType: "normal",
+      });
+
       navigate("/");
     } catch (error) {
       console.log(error.message);

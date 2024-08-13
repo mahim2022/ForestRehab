@@ -12,7 +12,6 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../firebase";
@@ -35,26 +34,57 @@ function Copyright(props) {
   );
 }
 
-// TODO remove, this demo shouldn't need to reset the theme.
-
 const defaultTheme = createTheme();
 
 export default function SignIn() {
-  //   const auth = getAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    // console.log({
-    //   email: data.get("email"),
-    //   password: data.get("password"),
-    // });
+
     try {
-      await signInWithEmailAndPassword(
+      const userCredential = await signInWithEmailAndPassword(
         auth,
         data.get("email"),
         data.get("password")
+      );
+
+      const user = userCredential.user;
+      // Store user details in localStorage
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          // Add other user info if needed
+        })
+      );
+
+      navigate("/");
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const handleDemoSignIn = async (email, password) => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      // Store user details in localStorage
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          // Add other user info if needed
+        })
       );
       navigate("/");
     } catch (error) {
@@ -117,6 +147,24 @@ export default function SignIn() {
               sx={{ mt: 3, mb: 2 }}
             >
               Sign In
+            </Button>
+            <Button
+              fullWidth
+              variant="contained"
+              color="secondary"
+              onClick={() => handleDemoSignIn("user1@gmail.com", "123456")}
+              sx={{ mt: 1, mb: 1 }}
+            >
+              Demo User Sign In
+            </Button>
+            <Button
+              fullWidth
+              variant="contained"
+              color="warning"
+              onClick={() => handleDemoSignIn("admin@gmail.com", "123456")}
+              sx={{ mt: 1, mb: 1 }}
+            >
+              Demo Admin Sign In
             </Button>
             <Grid container>
               <Grid item xs>

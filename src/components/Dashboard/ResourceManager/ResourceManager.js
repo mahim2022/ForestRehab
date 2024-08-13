@@ -20,13 +20,13 @@ import {
 } from "firebase/firestore";
 import { ref, deleteObject } from "firebase/storage";
 
-const ProjectManagement = () => {
-  const [projects, setProjects] = useState([]);
+const ResourceManager = () => {
+  const [resources, setResources] = useState([]);
   const navigate = useNavigate();
   const user = auth.currentUser;
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchResources = async () => {
       if (user) {
         // Fetch user type
         const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -34,110 +34,95 @@ const ProjectManagement = () => {
 
         let q;
         if (userType === "admin") {
-          // If admin, fetch all projects
-          q = query(collection(db, "projects"));
+          // If admin, fetch all resources
+          q = query(collection(db, "resources"));
         } else {
-          // If not admin or userType is undefined, fetch only projects for this user
+          // If not admin or userType is undefined, fetch only resources for this user
           q = query(
-            collection(db, "projects"),
+            collection(db, "resources"),
             where("userId", "==", user.uid)
           );
         }
 
         const querySnapshot = await getDocs(q);
-        const userProjects = querySnapshot.docs.map((doc) => ({
+        const userResources = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-        setProjects(userProjects);
+        setResources(userResources);
       }
     };
 
-    fetchProjects();
+    fetchResources();
   }, [user]);
 
-  const handleViewProject = (projectId) => {
-    navigate(`/project/${projectId}`);
+  const handleViewResource = (resourceId) => {
+    navigate(`/resource/${resourceId}`);
   };
 
-  const handleEditProject = (projectId) => {
-    navigate(`/editproject/${projectId}`);
+  const handleEditResource = (resourceId) => {
+    navigate(`/edit-resource/${resourceId}`);
   };
 
-  const handleDeleteProject = async (projectId) => {
+  const handleDeleteResource = async (resourceId) => {
     try {
-      // Get the project document
-      const projectDoc = await getDoc(doc(db, "projects", projectId));
-      if (projectDoc.exists()) {
-        const projectData = projectDoc.data();
-
-        // Delete the banner image
-        if (projectData.bannerImage) {
-          const bannerImageRef = ref(storage, projectData.bannerImage);
-          await deleteObject(bannerImageRef);
-        }
-
-        // Delete the media files
-        if (projectData.media && projectData.media.length > 0) {
-          for (const mediaUrl of projectData.media) {
-            const mediaRef = ref(storage, mediaUrl);
-            await deleteObject(mediaRef);
-          }
-        }
-
-        // Delete the project document
-        await deleteDoc(doc(db, "projects", projectId));
-        setProjects((prevProjects) =>
-          prevProjects.filter((project) => project.id !== projectId)
+      const resourceDoc = await getDoc(doc(db, "resources", resourceId));
+      if (resourceDoc.exists()) {
+        const resourceData = resourceDoc.data();
+        const fileRef = ref(storage, resourceData.fileURL);
+        await deleteObject(fileRef);
+        await deleteDoc(doc(db, "resources", resourceId));
+        setResources((prevResources) =>
+          prevResources.filter((resource) => resource.id !== resourceId)
         );
       }
     } catch (error) {
-      console.error("Error deleting project and media:", error);
+      console.error("Error deleting resource:", error);
     }
   };
 
-  const handleCreateProject = () => {
-    navigate("/ProjectForm");
+  const handleUploadResource = () => {
+    navigate("/uploadresource");
   };
 
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom align="center">
-        My Projects
+        My Resources
       </Typography>
       <Button
         variant="contained"
         color="primary"
-        onClick={handleCreateProject}
+        onClick={handleUploadResource}
         sx={{ mb: 4, display: "block", mx: "auto" }}
       >
-        Create New Project
+        Upload New Resource
       </Button>
       <Grid container spacing={3}>
-        {projects.length === 0 ? (
+        {resources.length === 0 ? (
           <Typography
             variant="h6"
             component="p"
             align="center"
             sx={{ width: "100%" }}
           >
-            No projects found.
+            No resources found.
           </Typography>
         ) : (
-          projects.map((project) => (
-            <Grid item xs={12} key={project.id}>
+          resources.map((resource) => (
+            <Grid item xs={12} key={resource.id}>
               <Card>
                 <CardContent>
                   <Typography variant="h5" component="h2">
-                    {project.title}
+                    {resource.title}
                   </Typography>
                   <Typography color="textSecondary">
-                    {project.description}
+                    {resource.description}
                   </Typography>
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={() => handleViewProject(project.id)}
+                    onClick={() => handleViewResource(resource.id)}
                     sx={{ mt: 2 }}
                   >
                     View
@@ -145,7 +130,7 @@ const ProjectManagement = () => {
                   <Button
                     variant="contained"
                     color="secondary"
-                    onClick={() => handleEditProject(project.id)}
+                    onClick={() => handleEditResource(resource.id)}
                     sx={{ mt: 2, ml: 2 }}
                   >
                     Edit
@@ -153,7 +138,7 @@ const ProjectManagement = () => {
                   <Button
                     variant="contained"
                     color="error"
-                    onClick={() => handleDeleteProject(project.id)}
+                    onClick={() => handleDeleteResource(resource.id)}
                     sx={{ mt: 2, ml: 2 }}
                   >
                     Delete
@@ -168,4 +153,4 @@ const ProjectManagement = () => {
   );
 };
 
-export default ProjectManagement;
+export default ResourceManager;

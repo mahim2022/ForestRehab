@@ -9,29 +9,33 @@ import {
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import { auth, db } from "../../../firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
 const ViewProject = () => {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isParticipating, setIsParticipating] = useState(false);
   const { projectId } = useParams(); // Get the projectId from the route params
   const navigate = useNavigate();
   const user = auth.currentUser;
 
   useEffect(() => {
     const fetchProject = async () => {
-      if (user && projectId) {
+      if (projectId) {
         try {
           const docRef = doc(db, "projects", projectId);
           const docSnap = await getDoc(docRef);
 
           if (docSnap.exists()) {
-            const fetchedProject = docSnap.data();
-            if (fetchedProject.userId === user.uid) {
-              setProject(fetchedProject);
-            } else {
-              console.error("You do not have permission to view this project.");
-              navigate("/"); // Redirect if user does not own the project
+            const projectData = docSnap.data();
+            setProject(projectData);
+
+            if (
+              user &&
+              projectData.participants &&
+              projectData.participants.includes(user.uid)
+            ) {
+              setIsParticipating(true);
             }
           } else {
             console.error("No such project!");
@@ -47,7 +51,26 @@ const ViewProject = () => {
     };
 
     fetchProject();
-  }, [user, projectId, navigate]);
+  }, [projectId, navigate, user]);
+
+  const handleParticipate = async () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    if (project && !isParticipating) {
+      try {
+        const docRef = doc(db, "projects", projectId);
+        await updateDoc(docRef, {
+          participants: arrayUnion(user.uid),
+        });
+        setIsParticipating(true);
+      } catch (err) {
+        console.error("Error updating project:", err);
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -108,16 +131,21 @@ const ViewProject = () => {
               ))}
             </div>
           )}
+          <Typography variant="h5" component="h2" sx={{ mt: 2 }}>
+            Participants:{" "}
+            {project.participants ? project.participants.length : 0}
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ mt: 2 }}
+            onClick={handleParticipate}
+            disabled={isParticipating}
+          >
+            {isParticipating ? "Already Participating" : "Participate"}
+          </Button>
         </CardContent>
       </Card>
-      <Button
-        variant="contained"
-        color="primary"
-        sx={{ mt: 4 }}
-        onClick={() => navigate(`/edit-project/${projectId}`)}
-      >
-        Edit Project
-      </Button>
     </Container>
   );
 };

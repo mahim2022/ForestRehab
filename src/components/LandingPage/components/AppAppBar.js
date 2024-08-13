@@ -123,7 +123,7 @@ function AppAppBar({ mode, toggleColorMode }) {
                 variant="text"
                 color="info"
                 size="small"
-                onClick={() => navigate("project")}
+                onClick={() => navigate("projectList")}
               >
                 Projects
               </Button>
@@ -131,7 +131,7 @@ function AppAppBar({ mode, toggleColorMode }) {
                 variant="text"
                 color="info"
                 size="small"
-                onClick={() => navigate("knowledge")}
+                onClick={() => navigate("resourcesList")}
               >
                 Knowledge Hub
               </Button>
@@ -139,7 +139,7 @@ function AppAppBar({ mode, toggleColorMode }) {
                 variant="text"
                 color="info"
                 size="small"
-                onClick={() => navigate("community")}
+                onClick={() => navigate("forum")}
               >
                 Community
               </Button>

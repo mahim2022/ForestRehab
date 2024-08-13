@@ -8,7 +8,7 @@ import {
   Button,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { auth, db } from "../../firebase";
+import { auth, db, storage } from "../../firebase";
 import {
   collection,
   query,
@@ -16,7 +16,14 @@ import {
   getDocs,
   deleteDoc,
   doc,
+  getDoc,
 } from "firebase/firestore";
+import { deleteObject, ref } from "firebase/storage";
+
+const truncateText = (text, maxLength) => {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + "...";
+};
 
 const ReportManagement = () => {
   const [reports, setReports] = useState([]);
@@ -26,10 +33,19 @@ const ReportManagement = () => {
   useEffect(() => {
     const fetchReports = async () => {
       if (user) {
-        const q = query(
-          collection(db, "reports"),
-          where("userId", "==", user.uid)
-        );
+        // Fetch user type
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        const userType = userDoc.exists() ? userDoc.data().userType : null;
+
+        let q;
+        if (userType === "admin") {
+          // If admin, fetch all reports
+          q = query(collection(db, "reports"));
+        } else {
+          // If not admin or userType is undefined, fetch only reports for this user
+          q = query(collection(db, "reports"), where("userId", "==", user.uid));
+        }
+
         const querySnapshot = await getDocs(q);
         const userReports = querySnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -51,8 +67,30 @@ const ReportManagement = () => {
   };
 
   const handleDeleteReport = async (reportId) => {
-    await deleteDoc(doc(db, "reports", reportId));
-    setReports(reports.filter((report) => report.id !== reportId));
+    try {
+      // Fetch the report document to get the image URL
+      const reportRef = doc(db, "reports", reportId);
+      const reportSnapshot = await getDoc(reportRef);
+      const reportData = reportSnapshot.data();
+
+      // Delete the image from Firebase Storage if it exists
+      if (reportData && reportData.imageUrl) {
+        const imageRef = ref(storage, reportData.imageUrl);
+        await deleteObject(imageRef);
+      }
+
+      // Delete the report document from Firestore
+      await deleteDoc(reportRef);
+
+      // Optionally, refresh the UI or navigate to a different page
+      // e.g., navigate("/"); or update state to remove the deleted report
+      setReports((prevReports) =>
+        prevReports.filter((report) => report.id !== reportId)
+      );
+    } catch (error) {
+      console.error("Error deleting report or image:", error);
+      // Optionally, display an error message to the user
+    }
   };
 
   const handleCreateReport = () => {
@@ -91,7 +129,7 @@ const ReportManagement = () => {
                     {report.title}
                   </Typography>
                   <Typography color="textSecondary">
-                    {report.description}
+                    {truncateText(report.description, 100)}
                   </Typography>
                   <Button
                     variant="contained"
